@@ -51,7 +51,7 @@
     "version": "1.0.0",
     "restore": {
       "projectUniqueName": "C:\\Users\\wayne\\source\\repos\\TcpServerTesting\\TcpServerTesting\\TcpServerTesting.csproj",
-      "projectName": "TcpServerTesting",
+      "projectName": "JBChat Server",
       "projectPath": "C:\\Users\\wayne\\source\\repos\\TcpServerTesting\\TcpServerTesting\\TcpServerTesting.csproj",
       "packagesPath": "C:\\Users\\wayne\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\wayne\\source\\repos\\TcpServerTesting\\TcpServerTesting\\obj\\",

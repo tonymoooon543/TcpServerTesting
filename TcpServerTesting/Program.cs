@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using SimpleTcp;
+using JBChatServer.ServerAPI;
+using JBAddons;
 
-namespace TcpServerTesting
+namespace JBChatServer
 {
     class Program
     {
@@ -14,19 +16,43 @@ namespace TcpServerTesting
 
         static int CheckCommand(string command)
         {
-            switch(command)
+            switch (command)
             {
-                case "com:clear":
+                case "clear":
                     Console.Clear();
+                    Console.WriteLine("Started server, on IP " + IP + " on port " + PORT);
                     return 1;
-                case "com:end":
-                    Console.WriteLine("Ending Server");
-                    server.Dispose();
-                    return 2;
-                default:
-                    Console.WriteLine("Unkown Command");
+                case "end":
+                    JBConsole.ColoredMessage(ConsoleColor.Yellow, "Are you sure? yes/no");
+                    string confirm = Console.ReadLine();
+                    if(confirm == "yes")
+                    {
+                        JBConsole.ColoredMessage(ConsoleColor.Red, "Endding Server...");
+                        server.Dispose();
+                        return 2;
+                    }
+                    else if(confirm == "no")
+                    {
+                        return -2;
+                    }
+                    return -2;
+                case "broadcast":
+                    Console.WriteLine("What do you want to send");
+                    string message = Console.ReadLine();
+                    JBMessages.BroadcastAsync(server, message);
                     return 3;
+                case "stats":
+                    SimpleTcpStatistics statistics = new SimpleTcpStatistics();
+                    Console.WriteLine(statistics.ToString());
+                    return 4;
+                case "help":
+                    JBConsole.ColoredMessage(ConsoleColor.Cyan, Commands.HelpMessage());
+                    return 5;
+                default:
+                    JBConsole.ColoredMessage(ConsoleColor.Yellow, "Unkown command!");
+                    return 0;
             }
+            
         }
 
         static void Main(string[] args)
@@ -42,6 +68,7 @@ namespace TcpServerTesting
 
             while (true)
             {
+                Console.WriteLine("Please type command: ");
                 var message = Console.ReadLine();
                 if(CheckCommand(message) == 2)
                 {
