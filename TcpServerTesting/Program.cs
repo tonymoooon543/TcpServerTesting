@@ -5,14 +5,20 @@ using System.Threading;
 using SimpleTcp;
 using JBChatServer.ServerAPI;
 using JBAddons;
+using JB.JBIni;
 
 namespace JBChatServer
 {
     class Program
     {
-        private const string PORT = "9000";
-        private const string IP = "127.0.0.1";
+        static IniFile ini = new IniFile("ServerSettings.ini");
+
+        static string PORT = ini.Read("Port", "General");
+        static string IP = ini.Read("IP", "General");
         static SimpleTcpServer server = new SimpleTcpServer(IP + ":" + PORT);
+
+        static int connectedClients = 0;
+        static int maxClients = ini.ReadInt("MaxClients", "General");
 
         static int CheckCommand(string command)
         {
@@ -52,7 +58,6 @@ namespace JBChatServer
                     JBConsole.ColoredMessage(ConsoleColor.Yellow, "Unkown command!");
                     return 0;
             }
-            
         }
 
         static void Main(string[] args)
@@ -83,21 +88,33 @@ namespace JBChatServer
 
         static void ClientConnected(object sender, ClientConnectedEventArgs e)
         {
-            Console.WriteLine("[" + e.IpPort + "] client connected");
+            connectedClients += 1;
+            if(connectedClients>=maxClients)
+            {
+                server.SendAsync(e.IpPort, "This server is full!");
+                server.DisconnectClient(e.IpPort);
+            }
+            else
+            {
+                Console.WriteLine("[" + e.IpPort + "] client connected");
+            }
+            
         }
 
         static void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
         {
+            
             Console.WriteLine("[" + e.IpPort + "] client disconnected: " + e.Reason.ToString());
         }
 
         static void DataReceived(object sender, DataReceivedEventArgs e)
         {
+            string clientSending = e.IpPort;
             Console.WriteLine("[" + e.IpPort + "] says: " + Encoding.UTF8.GetString(e.Data));
             IEnumerable<string> clients = server.GetClients();
             foreach (string client in clients)
             {
-                server.SendAsync(client, "says: " + Encoding.UTF8.GetString(e.Data));
+                server.SendAsync(client, "[" + clientSending + "]" + " says: " + Encoding.UTF8.GetString(e.Data));
             }
         }
     }
